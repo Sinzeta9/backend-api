@@ -1,12 +1,12 @@
 from fastapi import FastAPI
-from app.database import test_connection
+
+from app.routers.database import router as database_router
+
 app = FastAPI()
+
+app.include_router(database_router)
+
 
 @app.get("/")
 def root():
     return {"message": "Backend funcionando"}
-
-@app.get("/db-test")
-def db_test():
-    nombre = test_connection()
-    return {"database": nombre}
