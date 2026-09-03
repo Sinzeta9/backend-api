@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-from database import test_connection
-
+from app.database import test_connection
 app = FastAPI()
 
 @app.get("/")
