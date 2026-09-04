@@ -1,6 +1,6 @@
 from typing import Annotated
-from pydantic import BaseModel, StringConstraints
 
+from pydantic import BaseModel, StringConstraints
 
 NombreValido = Annotated[
     str,
@@ -10,6 +10,7 @@ NombreValido = Annotated[
     ),
 ]
 
+
 class PruebaCreate(BaseModel):
     nombre: NombreValido
 
@@ -17,10 +18,11 @@ class PruebaCreate(BaseModel):
 class PruebaUpdate(BaseModel):
     nombre: NombreValido
 
+
 class PruebaResponse(BaseModel):
     id: int
     nombre: str
 
+
 class PruebaListResponse(BaseModel):
     pruebas: list[PruebaResponse]
-
