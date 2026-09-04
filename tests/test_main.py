@@ -64,6 +64,7 @@ def test_actualizar_prueba():
     client.delete(f"/prueba/{id_creado}")
 
 
+
 def test_eliminar_prueba():
     response_create = client.post(
         "/prueba",
@@ -116,6 +117,22 @@ def test_actualizar_prueba_nombre_vacio():
     response = client.put(
         "/prueba/1",
         json={"nombre": ""},
+    )
+
+    assert response.status_code == 422
+
+def test_actualizar_prueba_nombre_solo_espacios():
+    response = client.put(
+        "/prueba/1",
+        json={"nombre": "   "},
+    )
+
+    assert response.status_code == 422
+
+def test_actualizar_prueba_nombre_solo_espacios():
+    response = client.put(
+        "/prueba/1",
+        json={"nombre": "   "},
     )
 
     assert response.status_code == 422
