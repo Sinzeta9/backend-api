@@ -52,10 +52,27 @@ uvicorn app.main:app --reload
 
 ## Endpoints
 
+## Endpoints
+
 - `GET /` — comprueba que la API funciona.
 - `GET /db-test` — comprueba la conexión con PostgreSQL.
-- `POST /prueba` — crea un nuevo registro.
+- `POST /prueba` — crea un nuevo registro. Devuelve `201 Created`.
 - `GET /pruebas` — muestra todos los registros.
+- `PUT /prueba/{id}` — actualiza un registro existente. Devuelve `404` si no existe.
+- `DELETE /prueba/{id}` — elimina un registro. Devuelve `204 No Content` si se elimina correctamente y 404` si no existe.
+
+## Validación
+
+Los datos de entrada se validan con Pydantic.
+
+El campo `nombre`:
+
+- No puede estar vacío.
+- No puede contener únicamente espacios.
+- Elimina automáticamente los espacios al principio y al final.
+- Los datos no válidos reciben una respuesta `422 Unprocessable Entity`.
+
+La validación se aplica tanto al crear (`POST`) como al actualizar (`PUT`) registros.
 
 ## Documentación
 
