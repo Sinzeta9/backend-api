@@ -7,7 +7,6 @@ from app.database import (
     listar_pruebas,
     test_connection,
 )
-
 from app.schemas import (
     PruebaCreate,
     PruebaListResponse,
