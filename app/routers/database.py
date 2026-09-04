@@ -25,7 +25,11 @@ def db_test():
     return {"database": nombre}
 
 
-@router.post("/prueba", response_model=PruebaResponse)
+@router.post(
+    "/prueba",
+    response_model=PruebaResponse,
+    status_code=201,
+)
 def crear_prueba_endpoint(datos: PruebaCreate):
     resultado = crear_prueba(datos.nombre)
 
@@ -58,7 +62,10 @@ def actualizar_prueba_endpoint(id: int, datos: PruebaUpdate):
     }
 
 
-@router.delete("/prueba/{id}", response_model=PruebaDeleteResponse)
+@router.delete(
+    "/prueba/{id}",
+    response_model=PruebaDeleteResponse,
+)
 def eliminar_prueba_endpoint(id: int):
     resultado = eliminar_prueba(id)
 
