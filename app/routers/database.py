@@ -10,7 +10,6 @@ from app.database import (
 
 from app.schemas import (
     PruebaCreate,
-    PruebaDeleteResponse,
     PruebaListResponse,
     PruebaResponse,
     PruebaUpdate,

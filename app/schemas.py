@@ -24,7 +24,3 @@ class PruebaResponse(BaseModel):
 class PruebaListResponse(BaseModel):
     pruebas: list[PruebaResponse]
 
-class PruebaDeleteResponse(BaseModel):
-    id: int
-    nombre: str
-    mensaje: str
