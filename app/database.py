@@ -27,3 +27,28 @@ def listar_pruebas():
             text("SELECT id, nombre FROM prueba ORDER BY id")
         )
         return result.mappings().all()
+
+def actualizar_prueba(id: int, nombre: str):
+    with engine.begin() as connection:
+        result = connection.execute(
+            text(
+                "UPDATE prueba "
+                "SET nombre = :nombre "
+                "WHERE id = :id "
+                "RETURNING id, nombre"
+            ),
+            {"id": id, "nombre": nombre},
+        )
+        return result.mappings().one_or_none()
+
+def eliminar_prueba(id: int):
+    with engine.begin() as connection:
+        result = connection.execute(
+            text(
+                "DELETE FROM prueba "
+                "WHERE id = :id "
+                "RETURNING id, nombre"
+            ),
+            {"id": id},
+        )
+        return result.mappings().one_or_none()
