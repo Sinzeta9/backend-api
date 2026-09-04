@@ -41,8 +41,7 @@ def test_crear_prueba():
 
     response_delete = client.delete(f"/prueba/{id_creado}")
 
-    assert response_delete.status_code == 200
-    assert response_delete.json()["id"] == id_creado
+    assert response_delete.status_code == 204
 
 
 def test_actualizar_prueba():
@@ -75,10 +74,8 @@ def test_eliminar_prueba():
 
     response_delete = client.delete(f"/prueba/{id_creado}")
 
-    assert response_delete.status_code == 200
-    assert response_delete.json()["id"] == id_creado
-    assert response_delete.json()["nombre"] == "Registro para eliminar"
-    assert response_delete.json()["mensaje"] == "Registro eliminado"
+    assert response_delete.status_code == 204
+
 
 
 def test_actualizar_prueba_no_existe():

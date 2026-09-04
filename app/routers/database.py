@@ -64,7 +64,7 @@ def actualizar_prueba_endpoint(id: int, datos: PruebaUpdate):
 
 @router.delete(
     "/prueba/{id}",
-    response_model=PruebaDeleteResponse,
+    status_code=204,
 )
 def eliminar_prueba_endpoint(id: int):
     resultado = eliminar_prueba(id)
@@ -74,7 +74,7 @@ def eliminar_prueba_endpoint(id: int):
             status_code=404,
             detail="Registro no encontrado",
         )
-
+    
     return {
         "id": resultado["id"],
         "nombre": resultado["nombre"],
