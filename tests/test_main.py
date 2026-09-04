@@ -111,3 +111,11 @@ def test_crear_prueba_nombre_solo_espacios():
     )
 
     assert response.status_code == 422
+
+def test_actualizar_prueba_nombre_vacio():
+    response = client.put(
+        "/prueba/1",
+        json={"nombre": ""},
+    )
+
+    assert response.status_code == 422
