@@ -72,3 +72,19 @@ def test_eliminar_prueba():
     assert response_delete.json()["id"] == id_creado
     assert response_delete.json()["nombre"] == "Registro para eliminar"
     assert response_delete.json()["mensaje"] == "Registro eliminado"
+
+
+def test_actualizar_prueba_no_existe():
+    response = client.put(
+        "/prueba/999999",
+        json={"nombre": "No existe"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Registro no encontrado"}
+
+def test_eliminar_prueba_no_existe():
+    response = client.delete("/prueba/999999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Registro no encontrado"}

@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.database import (actualizar_prueba, crear_prueba, eliminar_prueba, listar_pruebas, test_connection,)
+
 from app.schemas import PruebaCreate, PruebaUpdate
 
 router = APIRouter()
@@ -29,7 +30,10 @@ def actualizar_prueba_endpoint(id: int, datos: PruebaUpdate):
     resultado = actualizar_prueba(id, datos.nombre)
 
     if resultado is None:
-        return {"error": "Registro no encontrado"}
+        raise HTTPException(
+        status_code=404,
+        detail="Registro no encontrado",
+    )
 
     return {"id": resultado["id"], "nombre": resultado["nombre"]}
 
@@ -38,7 +42,10 @@ def eliminar_prueba_endpoint(id: int):
     resultado = eliminar_prueba(id)
 
     if resultado is None:
-        return {"error": "Registro no encontrado"}
+        raise HTTPException(
+        status_code=404,
+        detail="Registro no encontrado",
+    )
 
     return {
         "id": resultado["id"],
