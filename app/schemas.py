@@ -1,12 +1,21 @@
-from pydantic import BaseModel, Field
+from typing import Annotated
+from pydantic import BaseModel, StringConstraints
 
+
+NombreValido = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+    ),
+]
 
 class PruebaCreate(BaseModel):
-    nombre: str = Field(min_length=1)
+    nombre: NombreValido
 
 
 class PruebaUpdate(BaseModel):
-    nombre: str = Field(min_length=1)
+    nombre: NombreValido
 
 class PruebaResponse(BaseModel):
     id: int
