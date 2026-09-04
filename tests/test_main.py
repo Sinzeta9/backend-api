@@ -88,3 +88,11 @@ def test_eliminar_prueba_no_existe():
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Registro no encontrado"}
+
+def test_crear_prueba_nombre_vacio():
+    response = client.post(
+        "/prueba",
+        json={"nombre": ""},
+    )
+
+    assert response.status_code == 422

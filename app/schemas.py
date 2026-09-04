@@ -1,11 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PruebaCreate(BaseModel):
-    nombre: str
+    nombre: str = Field(min_length=1)
+
 
 class PruebaUpdate(BaseModel):
-    nombre: str
+    nombre: str = Field(min_length=1)
 
 class PruebaResponse(BaseModel):
     id: int
