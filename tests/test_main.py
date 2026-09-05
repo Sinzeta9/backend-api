@@ -25,7 +25,10 @@ def prueba_creada():
 
     id_creado = response.json()["id"]
 
-    yield id_creado
+    yield {
+        "id": id_creado,
+        "nombre": "Registro creado por fixture",
+    }
 
     client.delete(f"/prueba/{id_creado}")
 
@@ -69,17 +72,17 @@ def test_crear_prueba():
 
 def test_actualizar_prueba(prueba_creada):
     response_update = client.put(
-        f"/prueba/{prueba_creada}",
+        f"/prueba/{prueba_creada['id']}",
         json={"nombre": "Despues de actualizar"},
     )
 
     assert response_update.status_code == 200
-    assert response_update.json()["id"] == prueba_creada
+    assert response_update.json()["id"] == prueba_creada["id"]
     assert response_update.json()["nombre"] == "Despues de actualizar"
 
 
 def test_eliminar_prueba(prueba_creada):
-    response_delete = client.delete(f"/prueba/{prueba_creada}")
+    response_delete = client.delete(f"/prueba/{prueba_creada['id']}")
 
     assert response_delete.status_code == 204
 
