@@ -6,7 +6,12 @@ from fastapi.testclient import TestClient
 
 load_dotenv()
 
-os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
+
+if TEST_DATABASE_URL is None:
+    raise ValueError("TEST_DATABASE_URL no está configurada")
+
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
 
 from app.main import app
