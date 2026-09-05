@@ -6,10 +6,8 @@ from fastapi.testclient import TestClient
 
 load_dotenv()
 
-os.environ["DATABASE_URL"] = os.environ["DATABASE_URL"].replace(
-    "/devdb",
-    "/testdb",
-)
+os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+
 
 from app.main import app
 
