@@ -47,11 +47,12 @@ def test_db():
     assert response.json() == {"database": 1}
 
 
-def test_listar_pruebas():
+def test_listar_pruebas(prueba_creada):
     response = client.get("/pruebas")
 
     assert response.status_code == 200
     assert "pruebas" in response.json()
+    assert prueba_creada in response.json()["pruebas"]
 
 
 def test_crear_prueba():
