@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
 
 from app.config import DATABASE_URL
+from app.models import Prueba
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 
 def test_connection():
@@ -22,11 +22,15 @@ def crear_prueba(nombre: str):
         return result.mappings().one()
 
 def listar_pruebas():
-    with engine.connect() as connection:
-        result = connection.execute(
-            text("SELECT id, nombre FROM prueba ORDER BY id")
-        )
-        return result.mappings().all()
+    with SessionLocal() as db:
+        pruebas = db.scalars(
+            select(Prueba).order_by(Prueba.id)
+        ).all()
+
+        return [
+            {"id": prueba.id, "nombre": prueba.nombre}
+            for prueba in pruebas
+        ]
 
 def actualizar_prueba(id: int, nombre: str):
     with engine.begin() as connection:
