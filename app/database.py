@@ -14,12 +14,17 @@ def test_connection():
         return result.scalar()
 
 def crear_prueba(nombre: str):
-    with engine.begin() as connection:
-        result = connection.execute(
-            text("INSERT INTO prueba (nombre) VALUES (:nombre) RETURNING id, nombre"),
-            {"nombre": nombre},
-        )
-        return result.mappings().one()
+    with SessionLocal() as db:
+        prueba = Prueba(nombre=nombre)
+
+        db.add(prueba)
+        db.commit()
+        db.refresh(prueba)
+
+        return {
+            "id": prueba.id,
+            "nombre": prueba.nombre,
+        }
 
 def listar_pruebas():
     with SessionLocal() as db:
