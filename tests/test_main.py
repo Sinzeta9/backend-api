@@ -1,4 +1,14 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi.testclient import TestClient
+
+load_dotenv()
+
+os.environ["DATABASE_URL"] = os.environ["DATABASE_URL"].replace(
+    "/devdb",
+    "/testdb",
+)
 
 from app.main import app
 
@@ -16,8 +26,7 @@ def test_db():
     response = client.get("/db-test")
 
     assert response.status_code == 200
-    assert response.json() == {"database": "NucBox K12"}
-
+    assert response.json() == {"database": 1}
 
 def test_listar_pruebas():
     response = client.get("/pruebas")
@@ -61,7 +70,6 @@ def test_actualizar_prueba():
         assert response_update.json()["nombre"] == "Despues de actualizar"
     finally:
         client.delete(f"/prueba/{id_creado}")
-
 
 
 def test_eliminar_prueba():
@@ -114,6 +122,7 @@ def test_crear_prueba_nombre_solo_espacios():
 
     assert response.status_code == 422
 
+
 def test_actualizar_prueba_nombre_vacio():
     response = client.put(
         "/prueba/1",
@@ -122,6 +131,7 @@ def test_actualizar_prueba_nombre_vacio():
 
     assert response.status_code == 422
 
+
 def test_actualizar_prueba_nombre_solo_espacios():
     response = client.put(
         "/prueba/1",
@@ -129,4 +139,3 @@ def test_actualizar_prueba_nombre_solo_espacios():
     )
 
     assert response.status_code == 422
-

@@ -11,7 +11,7 @@ engine = create_engine(DATABASE_URL)
 
 def test_connection():
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT nombre FROM prueba WHERE id = 1"))
+        result = connection.execute(text("SELECT 1"))
         return result.scalar()
 
 def crear_prueba(nombre: str):
