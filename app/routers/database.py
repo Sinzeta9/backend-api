@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from app.database import (
     actualizar_prueba,
@@ -19,7 +20,7 @@ from app.schemas import (
 
 router = APIRouter()
 
-DatabaseDependency = Annotated[object, Depends(get_db)]
+DatabaseDependency = Annotated[Session, Depends(get_db)]
 
 
 @router.get("/db-test")

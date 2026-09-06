@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, select, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import DATABASE_URL
 from app.models import Prueba
@@ -19,7 +19,7 @@ def test_connection():
         return result.scalar()
 
 
-def crear_prueba(db, nombre: str):
+def crear_prueba(db: Session, nombre: str):
     prueba = Prueba(nombre=nombre)
 
     db.add(prueba)
@@ -32,13 +32,13 @@ def crear_prueba(db, nombre: str):
     }
 
 
-def listar_pruebas(db):
+def listar_pruebas(db: Session):
     pruebas = db.scalars(select(Prueba).order_by(Prueba.id)).all()
 
     return [{"id": prueba.id, "nombre": prueba.nombre} for prueba in pruebas]
 
 
-def actualizar_prueba(db, id: int, nombre: str):
+def actualizar_prueba(db: Session, id: int, nombre: str):
     prueba = db.get(Prueba, id)
 
     if prueba is None:
@@ -55,7 +55,7 @@ def actualizar_prueba(db, id: int, nombre: str):
     }
 
 
-def eliminar_prueba(db, id: int):
+def eliminar_prueba(db: Session, id: int):
     prueba = db.get(Prueba, id)
 
     if prueba is None:
