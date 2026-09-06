@@ -19,56 +19,54 @@ def test_connection():
         return result.scalar()
 
 
-def crear_prueba(nombre: str):
-    with SessionLocal() as db:
-        prueba = Prueba(nombre=nombre)
+def crear_prueba(db, nombre: str):
+    prueba = Prueba(nombre=nombre)
 
-        db.add(prueba)
-        db.commit()
-        db.refresh(prueba)
+    db.add(prueba)
+    db.commit()
+    db.refresh(prueba)
 
-        return {
-            "id": prueba.id,
-            "nombre": prueba.nombre,
-        }
-
-
-def listar_pruebas():
-    with SessionLocal() as db:
-        pruebas = db.scalars(select(Prueba).order_by(Prueba.id)).all()
-
-        return [{"id": prueba.id, "nombre": prueba.nombre} for prueba in pruebas]
+    return {
+        "id": prueba.id,
+        "nombre": prueba.nombre,
+    }
 
 
-def actualizar_prueba(id: int, nombre: str):
-    with SessionLocal() as db:
-        prueba = db.get(Prueba, id)
+def listar_pruebas(db):
+    pruebas = db.scalars(select(Prueba).order_by(Prueba.id)).all()
 
-        if prueba is None:
-            return None
-
-        prueba.nombre = nombre
-
-        db.commit()
-        db.refresh(prueba)
-
-        return {
-            "id": prueba.id,
-            "nombre": prueba.nombre,
-        }
+    return [{"id": prueba.id, "nombre": prueba.nombre} for prueba in pruebas]
 
 
-def eliminar_prueba(id: int):
-    with SessionLocal() as db:
-        prueba = db.get(Prueba, id)
+def actualizar_prueba(db, id: int, nombre: str):
+    prueba = db.get(Prueba, id)
 
-        if prueba is None:
-            return None
+    if prueba is None:
+        return None
 
-        db.delete(prueba)
-        db.commit()
+    prueba.nombre = nombre
 
-        return {
-            "id": prueba.id,
-            "nombre": prueba.nombre,
-        }
+    db.commit()
+    db.refresh(prueba)
+
+    return {
+        "id": prueba.id,
+        "nombre": prueba.nombre,
+    }
+
+
+def eliminar_prueba(db, id: int):
+    prueba = db.get(Prueba, id)
+
+    if prueba is None:
+        return None
+
+    resultado = {
+        "id": prueba.id,
+        "nombre": prueba.nombre,
+    }
+
+    db.delete(prueba)
+    db.commit()
+
+    return resultado
