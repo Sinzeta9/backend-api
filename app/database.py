@@ -8,6 +8,11 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+def get_db():
+    with SessionLocal() as db:
+        yield db
+
+
 def test_connection():
     with engine.connect() as connection:
         result = connection.execute(text("SELECT 1"))
