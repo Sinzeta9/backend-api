@@ -397,3 +397,113 @@ def test_password_se_guarda_hasheado():
             "Password123!",
             usuario.password_hash,
         )
+
+
+def crear_usuario_para_login(
+    email: str = "login@example.com",
+):
+    return client.post(
+        "/usuarios",
+        json={
+            "nombre": "Usuario login",
+            "email": email,
+            "password": "Password123!",
+        },
+    )
+
+
+def test_login_correcto():
+    crear_usuario_para_login()
+
+    response = client.post(
+        "/auth/login",
+        json={
+            "email": "login@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json()["token_type"] == "bearer"
+
+
+def test_login_password_incorrecto():
+    crear_usuario_para_login()
+
+    response = client.post(
+        "/auth/login",
+        json={
+            "email": "login@example.com",
+            "password": "PasswordIncorrecto",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "Credenciales incorrectas",
+    }
+
+
+def test_login_usuario_no_existe():
+    response = client.post(
+        "/auth/login",
+        json={
+            "email": "nadie@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "Credenciales incorrectas",
+    }
+
+
+def test_auth_me():
+    crear_usuario_para_login()
+
+    response_login = client.post(
+        "/auth/login",
+        json={
+            "email": "login@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    token = response_login.json()["access_token"]
+
+    response = client.get(
+        "/auth/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["email"] == "login@example.com"
+    assert "password" not in response.json()
+    assert "password_hash" not in response.json()
+
+
+def test_auth_me_sin_token():
+    response = client.get("/auth/me")
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "No autenticado",
+    }
+
+
+def test_auth_me_token_invalido():
+    response = client.get(
+        "/auth/me",
+        headers={
+            "Authorization": "Bearer token-invalido",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "Token inválido o expirado",
+    }
