@@ -1,10 +1,14 @@
 import os
 
 import pytest
+from alembic.config import Config
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 
+from alembic import command
+
 load_dotenv()
+
 
 def configurar_base_datos_tests():
     test_database_url = os.getenv("TEST_DATABASE_URL")
@@ -15,8 +19,13 @@ def configurar_base_datos_tests():
     os.environ["DATABASE_URL"] = test_database_url
 
 
-configurar_base_datos_tests()
+def migrar_base_datos_tests():
+    alembic_config = Config("alembic.ini")
+    command.upgrade(alembic_config, "head")
 
+
+configurar_base_datos_tests()
+migrar_base_datos_tests()
 
 from app.main import app
 
