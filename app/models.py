@@ -35,3 +35,23 @@ class Prueba(Base):
     categoria: Mapped[Categoria | None] = relationship(
         back_populates="pruebas",
     )
+
+
+class Usuario(Base):
+    __tablename__ = "usuario"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    nombre: Mapped[str] = mapped_column(
+        String(100),
+    )
+
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        index=True,
+    )
+
+    password_hash: Mapped[str] = mapped_column(
+        String(255),
+    )

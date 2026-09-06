@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, EmailStr, StringConstraints
 
 NombreValido = Annotated[
     str,
@@ -45,3 +45,19 @@ class PruebaResponse(BaseModel):
 
 class PruebaListResponse(BaseModel):
     pruebas: list[PruebaResponse]
+
+
+class UsuarioCreate(BaseModel):
+    nombre: NombreValido
+    email: EmailStr
+    password: str
+
+
+class UsuarioResponse(BaseModel):
+    id: int
+    nombre: str
+    email: EmailStr
+
+
+class UsuarioListResponse(BaseModel):
+    usuarios: list[UsuarioResponse]

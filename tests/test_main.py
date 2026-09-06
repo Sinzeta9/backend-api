@@ -4,6 +4,7 @@ import pytest
 from alembic.config import Config
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
+from sqlalchemy import delete
 
 from alembic import command
 
@@ -27,9 +28,25 @@ def migrar_base_datos_tests():
 configurar_base_datos_tests()
 migrar_base_datos_tests()
 
+from app.database import SessionLocal
 from app.main import app
+from app.models import Usuario
+from app.security import verificar_password
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def limpiar_usuarios():
+    with SessionLocal() as db:
+        db.execute(delete(Usuario))
+        db.commit()
+
+    yield
+
+    with SessionLocal() as db:
+        db.execute(delete(Usuario))
+        db.commit()
 
 
 @pytest.fixture
@@ -259,3 +276,124 @@ def test_listar_pruebas_categoria_no_existe():
     assert response.json() == {
         "detail": "Categoría no encontrada",
     }
+
+
+def test_crear_usuario():
+    response = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Bea",
+            "email": "bea@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["nombre"] == "Bea"
+    assert response.json()["email"] == "bea@example.com"
+    assert "id" in response.json()
+    assert "password" not in response.json()
+    assert "password_hash" not in response.json()
+
+
+def test_listar_usuarios():
+    response = client.get("/usuarios")
+
+    assert response.status_code == 200
+    assert "usuarios" in response.json()
+
+
+def test_obtener_usuario():
+    response_crear = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Usuario individual",
+            "email": "individual@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    usuario_id = response_crear.json()["id"]
+
+    response = client.get(
+        f"/usuarios/{usuario_id}",
+    )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == usuario_id
+    assert response.json()["email"] == "individual@example.com"
+    assert "password_hash" not in response.json()
+
+
+def test_usuario_email_invalido():
+    response = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Email malo",
+            "email": "esto-no-es-un-email",
+            "password": "Password123!",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_usuario_no_existe():
+    response = client.get(
+        "/usuarios/999999",
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Usuario no encontrado",
+    }
+
+
+def test_usuario_email_duplicado():
+    email = "duplicado@example.com"
+
+    client.post(
+        "/usuarios",
+        json={
+            "nombre": "Primero",
+            "email": email,
+            "password": "Password123!",
+        },
+    )
+
+    response = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Segundo",
+            "email": email,
+            "password": "Password456!",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "detail": "El email ya está registrado",
+    }
+
+
+def test_password_se_guarda_hasheado():
+    response = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Hash test",
+            "email": "hash@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    usuario_id = response.json()["id"]
+
+    with SessionLocal() as db:
+        usuario = db.get(Usuario, usuario_id)
+
+        assert usuario is not None
+        assert usuario.password_hash != "Password123!"
+        assert verificar_password(
+            "Password123!",
+            usuario.password_hash,
+        )
