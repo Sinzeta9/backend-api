@@ -55,13 +55,16 @@ def actualizar_prueba(id: int, nombre: str):
         }
 
 def eliminar_prueba(id: int):
-    with engine.begin() as connection:
-        result = connection.execute(
-            text(
-                "DELETE FROM prueba "
-                "WHERE id = :id "
-                "RETURNING id, nombre"
-            ),
-            {"id": id},
-        )
-        return result.mappings().one_or_none()
+    with SessionLocal() as db:
+        prueba = db.get(Prueba, id)
+
+        if prueba is None:
+            return None
+
+        db.delete(prueba)
+        db.commit()
+
+        return {
+            "id": prueba.id,
+            "nombre": prueba.nombre,
+        }
