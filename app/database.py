@@ -13,6 +13,7 @@ def test_connection():
         result = connection.execute(text("SELECT 1"))
         return result.scalar()
 
+
 def crear_prueba(nombre: str):
     with SessionLocal() as db:
         prueba = Prueba(nombre=nombre)
@@ -26,16 +27,13 @@ def crear_prueba(nombre: str):
             "nombre": prueba.nombre,
         }
 
+
 def listar_pruebas():
     with SessionLocal() as db:
-        pruebas = db.scalars(
-            select(Prueba).order_by(Prueba.id)
-        ).all()
+        pruebas = db.scalars(select(Prueba).order_by(Prueba.id)).all()
 
-        return [
-            {"id": prueba.id, "nombre": prueba.nombre}
-            for prueba in pruebas
-        ]
+        return [{"id": prueba.id, "nombre": prueba.nombre} for prueba in pruebas]
+
 
 def actualizar_prueba(id: int, nombre: str):
     with SessionLocal() as db:
@@ -53,6 +51,7 @@ def actualizar_prueba(id: int, nombre: str):
             "id": prueba.id,
             "nombre": prueba.nombre,
         }
+
 
 def eliminar_prueba(id: int):
     with SessionLocal() as db:
