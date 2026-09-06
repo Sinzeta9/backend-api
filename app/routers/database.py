@@ -1,6 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+)
 from sqlalchemy.orm import Session
 
 from app.database import (
@@ -22,18 +27,23 @@ from app.schemas import (
     PruebaCreate,
     PruebaListResponse,
     PruebaResponse,
+    PruebasCategoriaResponse,
     PruebaUpdate,
 )
 
 router = APIRouter()
 
-DatabaseDependency = Annotated[Session, Depends(get_db)]
+DatabaseDependency = Annotated[
+    Session,
+    Depends(get_db),
+]
 
 
 @router.get("/db-test")
 def db_test():
-    resultado = test_connection()
-    return {"database": resultado}
+    return {
+        "database": test_connection(),
+    }
 
 
 @router.post(
@@ -45,7 +55,10 @@ def crear_categoria_endpoint(
     datos: CategoriaCreate,
     db: DatabaseDependency,
 ):
-    return crear_categoria(db, datos.nombre)
+    return crear_categoria(
+        db,
+        datos.nombre,
+    )
 
 
 @router.get(
@@ -57,18 +70,23 @@ def listar_categorias_endpoint(
 ):
     categorias = listar_categorias(db)
 
-    return {"categorias": categorias}
+    return {
+        "categorias": categorias,
+    }
 
 
 @router.get(
     "/categorias/{categoria_id}/pruebas",
-    response_model=PruebaListResponse,
+    response_model=PruebasCategoriaResponse,
 )
 def listar_pruebas_categoria_endpoint(
     categoria_id: int,
     db: DatabaseDependency,
 ):
-    categoria = obtener_categoria(db, categoria_id)
+    categoria = obtener_categoria(
+        db,
+        categoria_id,
+    )
 
     if categoria is None:
         raise HTTPException(
@@ -81,7 +99,9 @@ def listar_pruebas_categoria_endpoint(
         categoria_id,
     )
 
-    return {"pruebas": pruebas}
+    return {
+        "pruebas": pruebas,
+    }
 
 
 @router.post(
@@ -119,10 +139,30 @@ def crear_prueba_endpoint(
 )
 def listar_pruebas_endpoint(
     db: DatabaseDependency,
+    pagina: Annotated[
+        int,
+        Query(ge=1),
+    ] = 1,
+    tamano: Annotated[
+        int,
+        Query(ge=1, le=100),
+    ] = 10,
 ):
-    pruebas = listar_pruebas(db)
+    pruebas, total = listar_pruebas(
+        db,
+        pagina,
+        tamano,
+    )
 
-    return {"pruebas": pruebas}
+    paginas = (total + tamano - 1) // tamano
+
+    return {
+        "items": pruebas,
+        "pagina": pagina,
+        "tamano": tamano,
+        "total": total,
+        "paginas": paginas,
+    }
 
 
 @router.put(
@@ -146,7 +186,7 @@ def actualizar_prueba_endpoint(
                 detail="Categoría no encontrada",
             )
 
-    resultado = actualizar_prueba(
+    prueba = actualizar_prueba(
         db,
         id,
         datos.nombre,
@@ -154,13 +194,13 @@ def actualizar_prueba_endpoint(
         datos.categoria_id,
     )
 
-    if resultado is None:
+    if prueba is None:
         raise HTTPException(
             status_code=404,
             detail="Registro no encontrado",
         )
 
-    return resultado
+    return prueba
 
 
 @router.delete(
@@ -171,9 +211,12 @@ def eliminar_prueba_endpoint(
     id: int,
     db: DatabaseDependency,
 ):
-    resultado = eliminar_prueba(db, id)
+    prueba = eliminar_prueba(
+        db,
+        id,
+    )
 
-    if resultado is None:
+    if prueba is None:
         raise HTTPException(
             status_code=404,
             detail="Registro no encontrado",

@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import DATABASE_URL
@@ -26,8 +26,13 @@ def test_connection():
         return result.scalar()
 
 
-def crear_categoria(db: Session, nombre: str):
-    categoria = Categoria(nombre=nombre)
+def crear_categoria(
+    db: Session,
+    nombre: str,
+):
+    categoria = Categoria(
+        nombre=nombre,
+    )
 
     db.add(categoria)
     db.commit()
@@ -36,12 +41,20 @@ def crear_categoria(db: Session, nombre: str):
     return categoria
 
 
-def listar_categorias(db: Session):
+def listar_categorias(
+    db: Session,
+):
     return db.scalars(select(Categoria).order_by(Categoria.id)).all()
 
 
-def obtener_categoria(db: Session, categoria_id: int):
-    return db.get(Categoria, categoria_id)
+def obtener_categoria(
+    db: Session,
+    categoria_id: int,
+):
+    return db.get(
+        Categoria,
+        categoria_id,
+    )
 
 
 def listar_pruebas_categoria(
@@ -51,6 +64,22 @@ def listar_pruebas_categoria(
     return db.scalars(
         select(Prueba).where(Prueba.categoria_id == categoria_id).order_by(Prueba.id)
     ).all()
+
+
+def listar_pruebas(
+    db: Session,
+    pagina: int,
+    tamano: int,
+):
+    offset = (pagina - 1) * tamano
+
+    pruebas = db.scalars(
+        select(Prueba).order_by(Prueba.id).offset(offset).limit(tamano)
+    ).all()
+
+    total = db.scalar(select(func.count()).select_from(Prueba))
+
+    return pruebas, total
 
 
 def crear_prueba(
@@ -72,10 +101,6 @@ def crear_prueba(
     return prueba
 
 
-def listar_pruebas(db: Session):
-    return db.scalars(select(Prueba).order_by(Prueba.id)).all()
-
-
 def actualizar_prueba(
     db: Session,
     id: int,
@@ -83,7 +108,10 @@ def actualizar_prueba(
     descripcion: str | None,
     categoria_id: int | None,
 ):
-    prueba = db.get(Prueba, id)
+    prueba = db.get(
+        Prueba,
+        id,
+    )
 
     if prueba is None:
         return None
@@ -98,8 +126,14 @@ def actualizar_prueba(
     return prueba
 
 
-def eliminar_prueba(db: Session, id: int):
-    prueba = db.get(Prueba, id)
+def eliminar_prueba(
+    db: Session,
+    id: int,
+):
+    prueba = db.get(
+        Prueba,
+        id,
+    )
 
     if prueba is None:
         return None

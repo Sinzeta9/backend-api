@@ -86,9 +86,19 @@ def test_listar_pruebas(prueba_creada):
     response = client.get("/pruebas")
 
     assert response.status_code == 200
-    assert "pruebas" in response.json()
-    assert prueba_creada in response.json()["pruebas"]
 
+    data = response.json()
+
+    assert "items" in data
+    assert "pagina" in data
+    assert "tamano" in data
+    assert "total" in data
+    assert "paginas" in data
+
+    assert isinstance(data["items"], list)
+    assert len(data["items"]) <= data["tamano"]
+    assert data["total"] >= 1
+    
 
 def test_crear_prueba():
     response = client.post(
@@ -614,3 +624,69 @@ def test_auth_me_token_invalido():
     assert response.json() == {
         "detail": "Token inválido o expirado",
     }
+
+
+def test_listar_pruebas_paginado():
+    for i in range(15):
+        client.post(
+            "/prueba",
+            json={
+                "nombre": f"Prueba {i}",
+                "descripcion": None,
+                "categoria_id": None,
+            },
+        )
+
+    response = client.get(
+        "/pruebas?pagina=1&tamano=10",
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data["items"]) == 10
+    assert data["pagina"] == 1
+    assert data["tamano"] == 10
+    assert data["total"] >= 15
+    assert data["paginas"] >= 2
+
+
+def test_listar_pruebas_segunda_pagina():
+    for i in range(15):
+        client.post(
+            "/prueba",
+            json={
+                "nombre": f"Prueba pagina 2 - {i}",
+                "descripcion": None,
+                "categoria_id": None,
+            },
+        )
+
+    response = client.get(
+        "/pruebas?pagina=2&tamano=10",
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["pagina"] == 2
+    assert data["tamano"] == 10
+    assert len(data["items"]) <= 10
+
+
+def test_listar_pruebas_pagina_invalida():
+    response = client.get(
+        "/pruebas?pagina=0",
+    )
+
+    assert response.status_code == 422
+
+
+def test_listar_pruebas_tamano_invalido():
+    response = client.get(
+        "/pruebas?tamano=101",
+    )
+
+    assert response.status_code == 422
