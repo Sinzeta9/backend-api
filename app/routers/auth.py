@@ -68,6 +68,30 @@ def obtener_usuario_actual(
     return usuario
 
 
+UsuarioActualDependency = Annotated[
+    Usuario,
+    Depends(obtener_usuario_actual),
+]
+
+
+def requerir_admin(
+    usuario: UsuarioActualDependency,
+):
+    if usuario.rol != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Permisos insuficientes",
+        )
+
+    return usuario
+
+
+AdminDependency = Annotated[
+    Usuario,
+    Depends(requerir_admin),
+]
+
+
 @router.post(
     "/login",
     response_model=TokenResponse,
@@ -106,9 +130,6 @@ def login(
     response_model=UsuarioResponse,
 )
 def usuario_actual(
-    usuario: Annotated[
-        Usuario,
-        Depends(obtener_usuario_actual),
-    ],
+    usuario: UsuarioActualDependency,
 ):
     return usuario

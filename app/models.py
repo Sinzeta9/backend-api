@@ -55,3 +55,9 @@ class Usuario(Base):
     password_hash: Mapped[str] = mapped_column(
         String(255),
     )
+
+    rol: Mapped[str] = mapped_column(
+        String(20),
+        default="usuario",
+        server_default="usuario",
+    )

@@ -57,6 +57,7 @@ class UsuarioResponse(BaseModel):
     id: int
     nombre: str
     email: EmailStr
+    rol: str
 
 
 class UsuarioListResponse(BaseModel):

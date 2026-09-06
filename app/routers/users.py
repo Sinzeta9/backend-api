@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Usuario
+from app.routers.auth import AdminDependency
 from app.schemas import (
     UsuarioCreate,
     UsuarioListResponse,
@@ -66,10 +67,13 @@ def crear_usuario(
 )
 def listar_usuarios(
     db: DatabaseDependency,
+    admin: AdminDependency,
 ):
     usuarios = db.scalars(select(Usuario).order_by(Usuario.id)).all()
 
-    return {"usuarios": usuarios}
+    return {
+        "usuarios": usuarios,
+    }
 
 
 @router.get(

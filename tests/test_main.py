@@ -296,11 +296,118 @@ def test_crear_usuario():
     assert "password_hash" not in response.json()
 
 
-def test_listar_usuarios():
+def crear_usuario_y_token(
+    email: str,
+):
+    response_usuario = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Usuario roles",
+            "email": email,
+            "password": "Password123!",
+        },
+    )
+
+    usuario_id = response_usuario.json()["id"]
+
+    response_login = client.post(
+        "/auth/login",
+        json={
+            "email": email,
+            "password": "Password123!",
+        },
+    )
+
+    token = response_login.json()["access_token"]
+
+    return usuario_id, token
+
+
+def convertir_en_admin(
+    usuario_id: int,
+):
+    with SessionLocal() as db:
+        usuario = db.get(
+            Usuario,
+            usuario_id,
+        )
+
+        assert usuario is not None
+
+        usuario.rol = "admin"
+        db.commit()
+
+
+def test_usuario_se_crea_con_rol_usuario():
+    response = client.post(
+        "/usuarios",
+        json={
+            "nombre": "Rol normal",
+            "email": "rol-normal@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["rol"] == "usuario"
+
+
+def test_listar_usuarios_sin_token():
     response = client.get("/usuarios")
+
+    assert response.status_code == 401
+
+
+def test_listar_usuarios_usuario_normal():
+    _, token = crear_usuario_y_token(
+        "normal@example.com",
+    )
+
+    response = client.get(
+        "/usuarios",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": "Permisos insuficientes",
+    }
+
+
+def test_listar_usuarios_admin():
+    usuario_id, token = crear_usuario_y_token(
+        "admin@example.com",
+    )
+
+    convertir_en_admin(usuario_id)
+
+    response = client.get(
+        "/usuarios",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
 
     assert response.status_code == 200
     assert "usuarios" in response.json()
+
+
+def test_auth_me_muestra_rol():
+    _, token = crear_usuario_y_token(
+        "me-rol@example.com",
+    )
+
+    response = client.get(
+        "/auth/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["rol"] == "usuario"
 
 
 def test_obtener_usuario():
