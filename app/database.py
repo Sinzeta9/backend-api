@@ -38,17 +38,21 @@ def listar_pruebas():
         ]
 
 def actualizar_prueba(id: int, nombre: str):
-    with engine.begin() as connection:
-        result = connection.execute(
-            text(
-                "UPDATE prueba "
-                "SET nombre = :nombre "
-                "WHERE id = :id "
-                "RETURNING id, nombre"
-            ),
-            {"id": id, "nombre": nombre},
-        )
-        return result.mappings().one_or_none()
+    with SessionLocal() as db:
+        prueba = db.get(Prueba, id)
+
+        if prueba is None:
+            return None
+
+        prueba.nombre = nombre
+
+        db.commit()
+        db.refresh(prueba)
+
+        return {
+            "id": prueba.id,
+            "nombre": prueba.nombre,
+        }
 
 def eliminar_prueba(id: int):
     with engine.begin() as connection:
