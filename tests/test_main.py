@@ -44,6 +44,8 @@ def prueba_creada():
     yield {
         "id": id_creado,
         "nombre": "Registro creado por fixture",
+        "descripcion": None,
+        "categoria_id": None,
     }
 
     client.delete(f"/prueba/{id_creado}")
@@ -155,3 +157,105 @@ def test_actualizar_prueba_nombre_solo_espacios():
     )
 
     assert response.status_code == 422
+
+
+def test_crear_categoria():
+    response = client.post(
+        "/categorias",
+        json={"nombre": "Backend"},
+    )
+
+    assert response.status_code == 201
+    assert response.json()["nombre"] == "Backend"
+    assert "id" in response.json()
+
+
+def test_listar_categorias():
+    response_crear = client.post(
+        "/categorias",
+        json={"nombre": "Data"},
+    )
+
+    categoria = response_crear.json()
+
+    response = client.get("/categorias")
+
+    assert response.status_code == 200
+    assert "categorias" in response.json()
+    assert categoria in response.json()["categorias"]
+
+
+def test_crear_prueba_con_categoria():
+    response_categoria = client.post(
+        "/categorias",
+        json={"nombre": "Cloud"},
+    )
+
+    categoria_id = response_categoria.json()["id"]
+
+    response = client.post(
+        "/prueba",
+        json={
+            "nombre": "Docker",
+            "descripcion": "Contenedores",
+            "categoria_id": categoria_id,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["nombre"] == "Docker"
+    assert response.json()["descripcion"] == "Contenedores"
+    assert response.json()["categoria_id"] == categoria_id
+
+
+def test_listar_pruebas_de_categoria():
+    response_categoria = client.post(
+        "/categorias",
+        json={"nombre": "Python"},
+    )
+
+    categoria_id = response_categoria.json()["id"]
+
+    response_prueba = client.post(
+        "/prueba",
+        json={
+            "nombre": "FastAPI",
+            "descripcion": "API backend",
+            "categoria_id": categoria_id,
+        },
+    )
+
+    prueba = response_prueba.json()
+
+    response = client.get(
+        f"/categorias/{categoria_id}/pruebas",
+    )
+
+    assert response.status_code == 200
+    assert prueba in response.json()["pruebas"]
+
+
+def test_crear_prueba_categoria_no_existe():
+    response = client.post(
+        "/prueba",
+        json={
+            "nombre": "Invalida",
+            "categoria_id": 999999,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Categoría no encontrada",
+    }
+
+
+def test_listar_pruebas_categoria_no_existe():
+    response = client.get(
+        "/categorias/999999/pruebas",
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Categoría no encontrada",
+    }

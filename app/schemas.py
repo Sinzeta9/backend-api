@@ -11,17 +11,36 @@ NombreValido = Annotated[
 ]
 
 
+class CategoriaCreate(BaseModel):
+    nombre: NombreValido
+
+
+class CategoriaResponse(BaseModel):
+    id: int
+    nombre: str
+
+
+class CategoriaListResponse(BaseModel):
+    categorias: list[CategoriaResponse]
+
+
 class PruebaCreate(BaseModel):
     nombre: NombreValido
+    descripcion: str | None = None
+    categoria_id: int | None = None
 
 
 class PruebaUpdate(BaseModel):
     nombre: NombreValido
+    descripcion: str | None = None
+    categoria_id: int | None = None
 
 
 class PruebaResponse(BaseModel):
     id: int
     nombre: str
+    descripcion: str | None
+    categoria_id: int | None
 
 
 class PruebaListResponse(BaseModel):
