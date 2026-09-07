@@ -1,4 +1,22 @@
 services:
+  app:
+    build: .
+    container_name: backend-api
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES}
+
+    depends_on:
+      - postgres
+
+    restart: unless-stopped
+
   postgres:
     image: postgres:17
     container_name: postgres-local
