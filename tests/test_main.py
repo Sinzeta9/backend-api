@@ -98,7 +98,7 @@ def test_listar_pruebas(prueba_creada):
     assert isinstance(data["items"], list)
     assert len(data["items"]) <= data["tamano"]
     assert data["total"] >= 1
-    
+
 
 def test_crear_prueba():
     response = client.post(
@@ -690,3 +690,15 @@ def test_listar_pruebas_tamano_invalido():
     )
 
     assert response.status_code == 422
+
+
+def test_logging_peticion(caplog):
+    with caplog.at_level(
+        "INFO",
+        logger="app.request",
+    ):
+        response = client.get("/")
+
+    assert response.status_code == 200
+
+    assert any("GET / status=200" in record.message for record in caplog.records)
